@@ -1,4 +1,4 @@
-#!/usr/bin/env bash -l
+#!/bin/bash -l
 
 # Read command line arguments.
 # Initialize our own variables:
