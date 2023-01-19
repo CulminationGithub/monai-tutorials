@@ -161,6 +161,7 @@ def run(log_dir, cfg):
         torch.cuda.set_device(device)
     else:
         device = torch.device("cuda" if cfg["use_gpu"] else "cpu")
+    print(device)
 
     # --------------------------------------------------------------------------
     # Data Loading and Preprocessing

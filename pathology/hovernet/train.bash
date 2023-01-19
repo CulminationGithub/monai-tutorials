@@ -61,8 +61,8 @@ else
     # Train a HoVerNet model on single-GPU or CPU-only (replace with your own ckpt path)
     export CUDA_VISIBLE_DEVICES=0
     echo "Stage 0"
-    python ${TRAINING_CMD} --stage 0 --ep 50 --bs 16 --log-dir ${LOGS_DIR}
+    python ${TRAINING_CMD} --stage 0 --no-gpu --ep 50 --bs 16 --log-dir ${LOGS_DIR}
     echo "Stage 1"
-    python ${TRAINING_CMD} --stage 1 --ep 50 --bs 16 --log-dir ${LOGS_DIR} \
+    python ${TRAINING_CMD} --stage 1 --no-gpu --ep 50 --bs 16 --log-dir ${LOGS_DIR} \
 	   --ckpt ${LOGS_DIR}/stage0/model.pt
 fi
