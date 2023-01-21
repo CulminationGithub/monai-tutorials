@@ -63,6 +63,5 @@ else
     echo "Stage 0"
     python ${TRAINING_CMD} --stage 0 --no-gpu --ep 50 --bs 16 --log-dir ${LOGS_DIR}
     echo "Stage 1"
-    python ${TRAINING_CMD} --stage 1 --no-gpu --ep 50 --bs 16 --log-dir ${LOGS_DIR} \
-	   --ckpt ${LOGS_DIR}/stage0/model.pt
+    python ${TRAINING_CMD} --stage 1 --no-gpu --ep 50 --bs 16 --log-dir ${LOGS_DIR} --ckpt ${LOGS_DIR}/stage0/model.pt
 fi
