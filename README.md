@@ -52,13 +52,9 @@ Each user is responsible for checking the content of datasets and the applicable
 - For bugs relating to MONAI functionality, please create an issue on the [main repository](https://github.com/Project-MONAI/MONAI/issues).
 - For bugs relating to the running of a tutorial, please create an issue in [this repository](https://github.com/Project-MONAI/Tutorials/issues).
 
-### 3. Note to developers
+### 3. Become a contributor
 
-During integration testing, we run these notebooks. To save time, we modify variables to avoid unecessary `for` loop iterations. Hence, during training please use the variables `max_epochs` and `val_interval` for the number of training epochs and validation interval, respectively.
-
-If your notebook doesn't use the idea of epochs, then please add it to the variable `doesnt_contain_max_epochs` in `runner.sh`. This lets the runner know that it's not a problem if it doesn't find `max_epochs`.
-
-If you have any other variables that would benefit by setting them to `1` during testing, add them to `strings_to_replace` in `runner.sh`.
+You can read details about adding a tutorial in our [CONTRIBUTING GUIDELINES](CONTRIBUTING.md).
 
 ### 4. List of notebooks and examples
 #### <ins>**2D classification**</ins>
@@ -80,6 +76,10 @@ The examples are PyTorch Ignite programs and have both dictionary-based and arra
 Training and evaluation examples of 3D classification based on DenseNet3D and [IXI dataset](https://brain-development.org/ixi-dataset).
 The examples are standard PyTorch programs and have both dictionary-based and array-based transformation versions.
 
+#### <ins>**3D regression**</ins>
+##### [densenet_training_array.ipynb](./3d_regression/densenet_training_array.ipynb)
+Training and evaluation examples of 3D regression based on DenseNet3D and [IXI dataset](https://brain-development.org/ixi-dataset).
+
 #### <ins>**3D segmentation**</ins>
 ##### [ignite examples](./3d_segmentation/ignite)
 Training and evaluation examples of 3D segmentation based on UNet3D and synthetic dataset.
@@ -88,7 +88,7 @@ The examples are PyTorch Ignite programs and have both dictionary-base and array
 Training, evaluation and inference examples of 3D segmentation based on UNet3D and synthetic dataset.
 The examples are standard PyTorch programs and have both dictionary-based and array-based versions.
 ##### [brats_segmentation_3d](./3d_segmentation/brats_segmentation_3d.ipynb)
-This tutorial shows how to construct a training workflow of multi-labels segmentation task based on [MSD Brain Tumor dataset](http://medicaldecathlon.com).
+This tutorial shows how to construct a training workflow of multi-labels segmentation task based on [MSD Brain Tumor dataset](http://medicaldecathlon.com), and how to convert the pytorch model to an onnx model for inference and comparison.
 ##### [spleen_segmentation_3d_aim](./3d_segmentation/spleen_segmentation_3d_visualization_basic.ipynb)
 This notebook shows how MONAI may be used in conjunction with the [`aimhubio/aim`](https://github.com/aimhubio/aim).
 ##### [spleen_segmentation_3d_lightning](./3d_segmentation/spleen_segmentation_3d_lightning.ipynb)
@@ -104,8 +104,6 @@ The example shows the flexibility of MONAI modules in a PyTorch-based program:
 - 3D UNet, Dice loss function, Mean Dice metric for 3D segmentation task.
 - Sliding window inference.
 - Deterministic training for reproducibility.
-##### [unet_segmentation_3d_catalyst](./3d_segmentation/unet_segmentation_3d_catalyst.ipynb)
-This notebook shows how MONAI may be used in conjunction with the [Catalyst](https://github.com/catalyst-team/catalyst) framework.
 ##### [unet_segmentation_3d_ignite](./3d_segmentation/unet_segmentation_3d_ignite.ipynb)
 This notebook is an end-to-end training & evaluation example of 3D segmentation based on synthetic dataset.
 The example is a PyTorch Ignite program and shows several key features of MONAI, especially with medical domain specific transforms and event handlers for profiling (logging, TensorBoard, MLFlow, etc.).
@@ -115,6 +113,8 @@ This folder provides a simple baseline method for training, validation, and infe
 This notebook demonstrates how to construct a training workflow of UNETR on multi-organ segmentation task using the BTCV challenge dataset.
 ##### [unetr_btcv_segmentation_3d_lightning](./3d_segmentation/unetr_btcv_segmentation_3d_lightning.ipynb)
 This tutorial demonstrates how MONAI can be used in conjunction with [PyTorch Lightning](https://www.pytorchlightning.ai/) framework to construct a training workflow of UNETR on multi-organ segmentation task using the BTCV challenge dataset.
+##### [vista3d](./3d_segmentation/vista3d)
+This tutorial showcases the process of fine-tuning VISTA3D on [MSD Spleen dataset](http://medicaldecathlon.com) using MONAI. For an in-depth exploration, please visit the [VISTA](https://github.com/Project-MONAI/VISTA) repository.
 
 #### <ins>**2D registration**</ins>
 ##### [registration using mednist](./2d_registration/registration_mednist.ipynb)
@@ -123,6 +123,9 @@ This notebook shows a quick demo for learning based affine registration of `64 x
 #### <ins>**3D registration**</ins>
 ##### [3D registration using paired lung CT](./3d_registration/paired_lung_ct.ipynb)
 This tutorial shows how to use MONAI to register lung CT volumes acquired at different time points for a single patient.
+
+##### [3D registration using unpaired brain MR](./3d_registration/learn2reg_oasis_unpaired_brain_mr.ipynb)
+This tutorial shows how to get started on using the general-purpose registration framework `VoxelMorph` offered in MONAI to register unpaired brain MR volumes.
 
 ##### [DeepAtlas](./deep_atlas/deep_atlas_tutorial.ipynb)
 This tutorial demonstrates the use of MONAI for training of registration and segmentation models _together_. The DeepAtlas approach, in which the two models serve as a source of weakly supervised learning for each other, is useful in situations where one has many unlabeled images and just a few images with segmentation labels. The notebook works with 3D images from the OASIS-1 brain MRI dataset.
@@ -139,7 +142,7 @@ inference on a pretrained DeepEdit model.
 
 #### <ins>**Deployment**</ins>
 ##### [BentoML](./deployment/bentoml)
-This is a simple example of training and deploying a MONAI network with [BentoML](https://www.bentoml.ai/) as a web server, either locally using the BentoML respository or as a containerized service.
+This is a simple example of training and deploying a MONAI network with [BentoML](https://www.bentoml.ai/) as a web server, either locally using the BentoML repository or as a containerized service.
 ##### [Ray](./deployment/ray)
 This uses the previous notebook's trained network to demonstrate deployment a web server using [Ray](https://docs.ray.io/en/master/serve/index.html#rayserve).
 ##### [Triton](./deployment/Triton/)
@@ -152,6 +155,9 @@ An example of experiment management with [Aim](https://aimstack.io/aim-monai-tut
 An example of experiment management with [MLFlow](https://www.mlflow.org/docs/latest/tracking.html), using 3D spleen segmentation as an example.
 ##### [MONAI bundle integrates MLFlow](./experiment_management/bundle_integrate_mlflow.ipynb)
 An example shows how to easily enable and customize the MLFlow for experiment management in MONAI bundle.
+##### [ClearML](./experiment_management/unet_segmentation_3d_ignite_clearml.ipynb)
+An example of experiment management with [ClearML](https://clear.ml/docs/latest/docs/), using 3D Segmentation with UNet as an example.
+
 
 #### <ins>**Federated Learning**</ins>
 ##### [NVFlare](./federated_learning/nvflare)
@@ -203,12 +209,12 @@ This notebook compares the performance of `Dataset`, `CacheDataset` and `Persist
 ##### [fast_training_tutorial](./acceleration/fast_training_tutorial.ipynb)
 This tutorial compares the training performance of pure PyTorch program and optimized program in MONAI based on NVIDIA GPU device and latest CUDA library.
 The optimization methods mainly include: `AMP`, `CacheDataset`, `GPU transforms`, `ThreadDataLoader`, `DiceCELoss` and `SGD`.
-##### [multi_gpu_test](./acceleration/multi_gpu_test.ipynb)
-This notebook is a quick demo for devices, run the Ignite trainer engine on CPU, GPU and multiple GPUs.
 ##### [threadbuffer_performance](./acceleration/threadbuffer_performance.ipynb)
 Demonstrates the use of the `ThreadBuffer` class used to generate data batches during training in a separate thread.
 ##### [transform_speed](./acceleration/transform_speed.ipynb)
 Illustrate reading NIfTI files and test speed of different transforms on different devices.
+##### [TensorRT_inference_acceleration](./acceleration/TensorRT_inference_acceleration.ipynb)
+This notebook shows how to use TensorRT to accelerate the model and achieve a better inference latency.
 
 #### <ins>**Model Zoo**</ins>
 ##### [easy_integrate_bundle](./model_zoo/app_integrate_bundle)
@@ -218,7 +224,7 @@ This tutorial shows a straightforward ensemble application to instruct users on 
 ##### [video segmentation](./computer_assisted_intervention/video_seg.ipynb)
 This tutorial shows how to train a surgical tool segmentation model to locate tools in a given image. In addition, it also builds an example pipeline of an end-to-end video tool segmentation, with video input and video output.
 ##### [endoscopic inbody classification](./computer_assisted_intervention/endoscopic_inbody_classification.ipynb)
-Tutorial to show the pipeline of fine tuning an endoscopic inbody classification model based on a corresponding pretrained bundle in monai model zoo.
+Tutorial to show the pipeline of fine tuning an endoscopic inbody classification model based on a corresponding pretrained bundle.
 
 #### <ins>**Modules**</ins>
 ##### [bundle](./bundle)
@@ -237,6 +243,8 @@ Tutorial that demonstrates how monai `SlidingWindowInferer` can be used when a 3
 This tutorial uses the MedNIST hand CT scan dataset to demonstrate MONAI's autoencoder class. The autoencoder is used with an identity encode/decode (i.e., what you put in is what you should get back), as well as demonstrating its usage for de-blurring and de-noising.
 ##### [batch_output_transform](./modules/batch_output_transform.ipynb)
 Tutorial to explain and show how to set `batch_transform` and `output_transform` of handlers to work with MONAI engines.
+##### [bending_energy_diffusion_loss_notes](./modules/bending_energy_diffusion_loss_notes.ipynb)
+This notebook demonstrates when and how to compute normalized bending energy and diffusion loss.
 ##### [compute_metric](./modules/compute_metric.py)
 Example shows how to compute metrics from saved predictions and labels with PyTorch multi-processing support.
 ##### [csv_datasets](./modules/csv_datasets.ipynb)
@@ -279,7 +287,7 @@ This notebook shows how to quickly set up training workflow based on `MedNISTDat
 This notebook shows how to load the TCIA data with CSVDataset from CSV file and extract information for TCIA data to fetch DICOM images based on REST API.
 ##### [transforms_demo_2d](./modules/transforms_demo_2d.ipynb)
 This notebook demonstrates the image transformations on histology images using
-##### [UNet_input_size_constrains](./modules/UNet_input_size_constrains.ipynb)
+##### [UNet_input_size_constraints](./modules/UNet_input_size_constraints.ipynb)
 This tutorial shows how to determine a reasonable spatial size of the input data for MONAI UNet, which not only supports residual units, but also can use more hyperparameters (like `strides`, `kernel_size` and `up_kernel_size`) than the basic UNet implementation.
 ##### [TorchIO, MONAI, PyTorch Lightning](./modules/TorchIO_MONAI_PyTorch_Lightning.ipynb)
 This notebook demonstrates how the three libraries from the official PyTorch Ecosystem can be used together to segment the hippocampus on brain MRIs from the Medical Segmentation Decathlon.
@@ -287,11 +295,44 @@ This notebook demonstrates how the three libraries from the official PyTorch Eco
 This tutorial uses the MedNIST scan (or alternatively the MNIST) dataset to demonstrate MONAI's variational autoencoder class.
 ##### [interpretability](./modules/interpretability)
 Tutorials in this folder demonstrate model visualisation and interpretability features of MONAI. Currently, it consists of class activation mapping and occlusion sensitivity for 3D classification model visualisations and analysis.
-##### [Transfer learning with MMAR](./modules/transfer_mmar.ipynb)
-This tutorial demonstrates a transfer learning pipeline from a pretrained model in [Clara Train's Medical Model Archive format](https://docs.nvidia.com/clara/clara-train-sdk/pt/mmar.html).  The notebook also shows the use of LMDB-based dataset.
 
 ##### [Transform visualization](./modules/transform_visualization.ipynb)
 This tutorial shows several visualization approaches for 3D image during transform augmentation.
 
 #### [Auto3DSeg](./auto3dseg/)
-This folder shows how to run the comprehensive Auto3Dseg pipeline with minimal inputs and customize the Auto3Dseg modules to meet different user requirements.
+This folder shows how to run the comprehensive Auto3DSeg pipeline with minimal inputs and customize the Auto3Dseg modules to meet different user requirements.
+
+#### <ins>**Self-Supervised Learning**</ins>
+##### [self_supervised_pretraining](self_supervised_pretraining/vit_unetr_ssl/ssl_train.ipynb)
+This tutorial shows how to construct a training workflow of self-supervised learning where unlabeled data is utilized. The tutorial shows how to train a model on TCIA dataset of unlabeled Covid-19 cases.
+
+##### [self_supervised_pretraining_based_finetuning](self_supervised_pretraining/vit_unetr_ssl/ssl_finetune.ipynb)
+This tutorial shows how to utilize pre-trained weights from the self-supervised learning framework where unlabeled data is utilized. This tutorial shows how to train a model of multi-class 3D segmentation using pretrained weights.
+
+#### [Generative Model](./generative)
+##### [3D latent diffusion model](./generative/3d_ldm)
+This tutorial shows the use cases of training and validating a 3D Latent Diffusion Model.
+
+##### [2D latent diffusion model](./generative/2d_ldm)
+This tutorial shows the use cases of training and validating a 2D Latent Diffusion Model.
+
+##### [Brats 3D latent diffusion model](./3d_ldm/README.md)
+Example shows the use cases of training and validating a 3D Latent Diffusion Model on Brats 2016&2017 data, expanding on the above notebook.
+
+##### [MAISI 3D latent diffusion model](./maisi/README.md)
+Example shows the use cases of training and validating Nvidia MAISI (Medical AI for Synthetic Imaging) model, a 3D Latent Diffusion Model that can generate large CT images with paired segmentation masks, variable volume size and voxel size, as well as controllable organ/tumor size.
+
+##### [SPADE in VAE-GAN for Semantic Image Synthesis on 2D BraTS Data](./spade_gen)
+Example shows the use cases of applying SPADE, a VAE-GAN-based neural network for semantic image synthesis, to a subset of BraTS that was registered to MNI space and resampled to 2mm isotropic space, with segmentations obtained using Geodesic Information Flows (GIF).
+
+##### [Applying Latent Diffusion Models to 2D BraTS Data for Semantic Image Synthesis](./spade_ldm)
+Example shows the use cases of applying SPADE normalization to a latent diffusion model, following the methodology by Wang et al., for semantic image synthesis on a subset of BraTS registered to MNI space and resampled to 2mm isotropic space, with segmentations obtained using Geodesic Information Flows (GIF).
+
+##### [Diffusion Models for Implicit Image Segmentation Ensembles](./image_to_image_translation)
+Example shows the use cases of how to use MONAI for 2D segmentation of images using DDPMs. The same structure can also be used for conditional image generation, or image-to-image translation.
+
+##### [Evaluate Realism and Diversity of the generated images](./realism_diversity_metrics)
+Example shows the use cases of using MONAI to evaluate the performance of a generative model by computing metrics such as Frechet Inception Distance (FID) and Maximum Mean Discrepancy (MMD) for assessing realism, as well as MS-SSIM and SSIM for evaluating image diversity.
+
+#### [VISTA2D](./vista_2d)
+This tutorial demonstrates how to train a cell segmentation model using the [MONAI](https://monai.io/) framework and the [Segment Anything Model (SAM)](https://github.com/facebookresearch/segment-anything) on the [Cellpose dataset](https://www.cellpose.org/).

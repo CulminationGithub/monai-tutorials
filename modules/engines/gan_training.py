@@ -1,4 +1,4 @@
-# Copyright 2020 MONAI Consortium
+# Copyright (c) MONAI Consortium
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -8,12 +8,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 """
 MONAI Generative Adversarial Networks Workflow Example
     Sample script using MONAI to train a GAN to synthesize images from a latent code.
 
 ## Get the dataset
-    MedNIST.tar.gz link: https://drive.google.com/uc?id=1QsnnkvZyJPcbRoV_ArW8SnE1OTuoVbKE
+    MedNIST.tar.gz link: https://developer.download.nvidia.com/assets/Clara/monai/tutorials/MedNIST.tar.gz
     Extract tarball and set input_dir variable. GAN script trains using hand CT scan jpg images.
 
     Dataset information available in MedNIST Tutorial
@@ -28,7 +29,7 @@ import torch
 import numpy as np
 import monai
 from monai.apps.utils import download_and_extract
-from monai.data import CacheDataset, DataLoader, png_writer
+from monai.data import CacheDataset, DataLoader
 from monai.engines import GanTrainer
 from monai.engines.utils import GanKeys as Keys
 from monai.engines.utils import default_make_latent as make_latent
@@ -36,7 +37,7 @@ from monai.handlers import CheckpointSaver, StatsHandler
 from monai.networks import normal_init
 from monai.networks.nets import Discriminator, Generator
 from monai.transforms import (
-    AddChannelD,
+    EnsureChannelFirstD,
     Compose,
     LoadImageD,
     RandFlipD,
@@ -46,6 +47,7 @@ from monai.transforms import (
     EnsureTypeD,
 )
 from monai.utils.misc import set_determinism
+from monai.data.image_writer import PILWriter
 
 
 def main():
@@ -67,7 +69,7 @@ def main():
     train_transforms = Compose(
         [
             LoadImageD(keys=["hand"]),
-            AddChannelD(keys=["hand"]),
+            EnsureChannelFirstD(keys=["hand"], channel_dim="no_channel"),
             ScaleIntensityD(keys=["hand"]),
             RandRotateD(keys=["hand"], range_x=np.pi / 12, prob=0.5, keep_size=True),
             RandFlipD(keys=["hand"], spatial_axis=0, prob=0.5),
@@ -192,11 +194,15 @@ def main():
     test_img_count = 10
     test_latents = make_latent(test_img_count, latent_size).to(device)
     fakes = gen_net(test_latents)
+
+    writer_obj = PILWriter(output_dtype=np.uint8)
+
     for i, image in enumerate(fakes):
-        filename = "gen-fake-final-%d.png" % i
+        filename = f"gen-fake-final-{i}.png"
         save_path = os.path.join(run_dir, filename)
-        img_array = image[0].cpu().data.numpy()
-        png_writer.write_png(img_array, save_path, scale=255)
+        img_array = monai.transforms.utils.rescale_array(image[0].cpu().data.numpy())
+        writer_obj.set_data_array(img_array, channel_dim=None)
+        writer_obj.write(save_path, format="PNG")
 
 
 if __name__ == "__main__":

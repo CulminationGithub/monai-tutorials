@@ -1,15 +1,24 @@
+# Copyright (c) MONAI Consortium
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import logging
 import os
 import time
 from argparse import ArgumentParser
 
 import numpy as np
-import pandas as pd
 import torch
 from ignite.metrics import Accuracy
 from torch.optim import SGD, lr_scheduler
 
-import monai
 from monai.data import DataLoader, PatchWSIDataset, CSVDataset
 from monai.engines import SupervisedEvaluator, SupervisedTrainer
 from monai.handlers import (
@@ -258,9 +267,9 @@ def main():
     parser.add_argument("--openslide", action="store_true", dest="use_openslide", help="use OpenSlide")
     parser.add_argument("--no-amp", action="store_false", dest="amp", help="deactivate amp")
     parser.add_argument("--no-novograd", action="store_false", dest="novograd", help="deactivate novograd optimizer")
-    parser.add_argument("--no-pretrain", action="store_false", dest="pretrain", help="deactivate Imagenet weights")
+    parser.add_argument("--pretrain", action="store_true", dest="pretrain", help="activate Imagenet weights")
 
-    parser.add_argument("--cpu", type=int, default=8, dest="num_workers", help="number of workers")
+    parser.add_argument("--cpu", type=int, default=2, dest="num_workers", help="number of workers")
     parser.add_argument("--gpu", type=str, default="0", dest="gpu", help="which gpu to use")
 
     args = parser.parse_args()

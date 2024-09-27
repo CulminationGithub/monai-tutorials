@@ -1,4 +1,4 @@
-# Copyright 2020 MONAI Consortium
+# Copyright (c) MONAI Consortium
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -73,7 +73,7 @@ from monai.handlers import CheckpointSaver, LrScheduleHandler, StatsHandler, fro
 from monai.inferers import SimpleInferer
 from monai.transforms import (
     Activationsd,
-    AsChannelFirstd,
+    EnsureChannelFirstd,
     AsDiscreted,
     Compose,
     KeepLargestConnectedComponentd,
@@ -111,7 +111,7 @@ def train(args):
     train_transforms = Compose(
         [
             LoadImaged(keys=["image", "label"]),
-            AsChannelFirstd(keys=["image", "label"], channel_dim=-1),
+            EnsureChannelFirstd(keys=["image", "label"], channel_dim=-1),
             ScaleIntensityd(keys="image"),
             RandCropByPosNegLabeld(
                 keys=["image", "label"], label_key="label", spatial_size=[96, 96, 96], pos=1, neg=1, num_samples=4

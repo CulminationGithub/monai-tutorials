@@ -151,3 +151,9 @@ deployment/ray/mednist_classifier_start.py
 *.nii.gz
 3d_segmentation/out
 *.nsys-rep
+auto3dseg/notebooks/datalist.json
+
+*.jpeg
+*.png
+*.np*
+*.pt

@@ -1,3 +1,14 @@
+# Copyright (c) MONAI Consortium
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import json
 import logging
 import os
@@ -382,6 +393,7 @@ def main(cfg):
         optimizer = SGD(model.parameters(), lr=cfg["lr"], momentum=0.9)
 
     # AMP scaler
+    cfg["amp"] = cfg["amp"] and monai.utils.get_torch_version_tuple() >= (1, 6)
     if cfg["amp"] is True:
         scaler = GradScaler()
     else:
@@ -465,6 +477,9 @@ def main(cfg):
     # Save final metrics
     metric_summary["train_time_per_epoch"] = total_train_time / cfg["n_epochs"]
     metric_summary["total_time"] = t_end - t_start
+
+    # The type of the value in hparam_dict can only be one of bool, string, float, int, or None.
+    cfg["grid_shape"] = str(cfg["grid_shape"])
     writer.add_hparams(hparam_dict=cfg, metric_dict=metric_summary, run_name=log_dir)
     writer.close()
     logging.info(f"Metric Summary: {metric_summary}")

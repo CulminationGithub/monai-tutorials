@@ -47,8 +47,10 @@ def main():
 
     monai.config.print_config()
 
-    env_dict = json.load(open(args.environment_file, "r"))
-    config_dict = json.load(open(args.config_file, "r"))
+    with open(args.environment_file, "r") as env_file:
+        env_dict = json.load(env_file)
+    with open(args.config_file, "r") as config_file:
+        config_dict = json.load(config_file)
 
     for k, v in env_dict.items():
         setattr(args, k, v)
@@ -61,6 +63,7 @@ def main():
         [
             LoadImaged(
                 keys=["image"],
+                image_only=False,
                 meta_key_postfix="meta_dict",
                 reader="itkreader",
                 affine_lps_to_ras=True,

@@ -6,7 +6,7 @@ Typically, model training is a time-consuming step during deep learning developm
 The document introduces details of how to profile the training pipeline, how to analyze the dataset and select suitable algorithms, and how to optimize GPU utilization in single GPU, multi-GPUs or even multi-nodes.
 #### [distributed_training](./distributed_training)
 The examples show how to execute distributed training and evaluation based on 3 different frameworks:
-- PyTorch native `DistributedDataParallel` module with `torch.distributed.launch`.
+- PyTorch native `DistributedDataParallel` module with `torchrun`.
 - Horovod APIs with `horovodrun`.
 - PyTorch ignite and MONAI workflows.
 
@@ -18,9 +18,12 @@ This notebook compares the performance of `Dataset`, `CacheDataset` and `Persist
 #### [fast_training_tutorial](./fast_training_tutorial.ipynb)
 This tutorial compares the training performance of pure PyTorch program and optimized program in MONAI based on NVIDIA GPU device and latest CUDA library.
 The optimization methods mainly include: `AMP`, `CacheDataset` and `Novograd`.
-#### [multi_gpu_test](./multi_gpu_test.ipynb)
-This notebook is a quick demo for devices, run the Ignite trainer engine on CPU, GPU and multiple GPUs.
 #### [threadbuffer_performance](./threadbuffer_performance.ipynb)
 Demonstrates the use of the `ThreadBuffer` class used to generate data batches during training in a separate thread.
 #### [transform_speed](./transform_speed.ipynb)
 Illustrate reading NIfTI files and test speed of different transforms on different devices.
+#### [TensorRT_inference_acceleration](./TensorRT_inference_acceleration.ipynb)
+This notebook shows how to use TensorRT to accelerate the model and achieve a better inference latency.
+
+#### [Tutorials for resource monitoring](./monitoring/README.md)
+Information about how to set up and apply existing tools to monitor the computing resources.

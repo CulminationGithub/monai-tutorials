@@ -1,3 +1,14 @@
+# Copyright (c) MONAI Consortium
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 import tempfile
 import zipfile
@@ -9,7 +20,7 @@ import substratools as tools
 from torch.utils.data import DataLoader
 
 from monai.data import CacheDataset, NiftiSaver, create_test_image_3d, list_data_collate
-from monai.transforms import AsChannelFirstd, Compose, LoadImaged, ScaleIntensityd, ToTensord
+from monai.transforms import EnsureChannelFirstd, Compose, LoadImaged, ScaleIntensityd, ToTensord
 
 
 class MonaiTestOpener(tools.Opener):
@@ -31,7 +42,7 @@ class MonaiTestOpener(tools.Opener):
         transforms = Compose(
             [
                 LoadImaged(keys=["img", "seg"]),
-                AsChannelFirstd(keys=["img", "seg"], channel_dim=-1),
+                EnsureChannelFirstd(keys=["img", "seg"], channel_dim=-1),
                 ScaleIntensityd(keys="img"),
                 ToTensord(keys=["img", "seg"]),
             ]
@@ -73,7 +84,7 @@ class MonaiTestOpener(tools.Opener):
         transforms = Compose(
             [
                 LoadImaged(keys=["seg"]),
-                AsChannelFirstd(keys=["seg"], channel_dim=-1),
+                EnsureChannelFirstd(keys=["seg"], channel_dim=-1),
                 ToTensord(keys=["seg"]),
             ]
         )

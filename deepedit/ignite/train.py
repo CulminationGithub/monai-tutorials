@@ -76,7 +76,7 @@ def get_network(network, labels, spatial_size):
             hidden_size=1536,
             mlp_dim=3072,
             num_heads=48,
-            pos_embed="conv",
+            proj_type="conv",
             norm_name="instance",
             res_block=True,
         )
@@ -161,10 +161,9 @@ def get_loaders(args, pre_transforms):
 
     all_images = sorted(glob.glob(os.path.join(args.input, "imagesTr", "*.nii.gz")))
     all_labels = sorted(glob.glob(os.path.join(args.input, "labelsTr", "*.nii.gz")))
-    datalist = [{"image": image_name, "label": label_name} for image_name, label_name in
-                zip(all_images, all_labels)]
+    datalist = [{"image": image_name, "label": label_name} for image_name, label_name in zip(all_images, all_labels)]
 
-    datalist = datalist[0: args.limit] if args.limit else datalist
+    datalist = datalist[0 : args.limit] if args.limit else datalist
     total_l = len(datalist)
 
     if multi_gpu:
@@ -183,31 +182,18 @@ def get_loaders(args, pre_transforms):
         seed=args.seed,
     )
 
-    train_ds = PersistentDataset(
-        train_datalist, pre_transforms, cache_dir=args.cache_dir
-    )
-    train_loader = DataLoader(
-        train_ds, shuffle=True, num_workers=2
-    )
-    logging.info(
-        "{}:: Total Records used for Training is: {}/{}".format(
-            local_rank, len(train_ds), total_l
-        )
-    )
+    train_ds = PersistentDataset(train_datalist, pre_transforms, cache_dir=args.cache_dir)
+    train_loader = DataLoader(train_ds, shuffle=True, num_workers=2)
+    logging.info("{}:: Total Records used for Training is: {}/{}".format(local_rank, len(train_ds), total_l))
 
     val_ds = PersistentDataset(val_datalist, pre_transforms, cache_dir=args.cache_dir)
     val_loader = DataLoader(val_ds, num_workers=2)
-    logging.info(
-        "{}:: Total Records used for Validation is: {}/{}".format(
-            local_rank, len(val_ds), total_l
-        )
-    )
+    logging.info("{}:: Total Records used for Validation is: {}/{}".format(local_rank, len(val_ds), total_l))
 
     return train_loader, val_loader
 
 
 def create_trainer(args):
-
     set_determinism(seed=args.seed)
 
     multi_gpu = args.multi_gpu
@@ -228,16 +214,12 @@ def create_trainer(args):
     # define training components
     network = get_network(args.network, args.labels, args.spatial_size).to(device)
     if multi_gpu:
-        network = torch.nn.parallel.DistributedDataParallel(
-            network, device_ids=[local_rank], output_device=local_rank
-        )
+        network = torch.nn.parallel.DistributedDataParallel(network, device_ids=[local_rank], output_device=local_rank)
 
     if args.resume:
         logging.info("{}:: Loading Network...".format(local_rank))
         map_location = {"cuda:0": "cuda:{}".format(local_rank)}
-        network.load_state_dict(
-            torch.load(args.model_filepath, map_location=map_location)
-        )
+        network.load_state_dict(torch.load(args.model_filepath, map_location=map_location))
 
     # define event-handlers for engine
     val_handlers = [
@@ -274,6 +256,7 @@ def create_trainer(args):
             click_probability_key="probability",
             train=False,
             label_names=args.labels,
+            max_interactions=args.max_val_interactions,
         ),
         inferer=SimpleInferer(),
         postprocessing=post_transform,
@@ -287,12 +270,8 @@ def create_trainer(args):
 
     train_handlers = [
         LrScheduleHandler(lr_scheduler=lr_scheduler, print_lr=True),
-        ValidationHandler(
-            validator=evaluator, interval=args.val_freq, epoch_level=True
-        ),
-        StatsHandler(
-            tag_name="train_loss", output_transform=from_engine(["loss"], first=True)
-        ),
+        ValidationHandler(validator=evaluator, interval=args.val_freq, epoch_level=True),
+        StatsHandler(tag_name="train_loss", output_transform=from_engine(["loss"], first=True)),
         TensorBoardStatsHandler(
             log_dir=args.output,
             tag_name="train_loss",
@@ -309,8 +288,9 @@ def create_trainer(args):
     train_handlers = train_handlers if local_rank == 0 else train_handlers[:2]
 
     all_train_metrics = dict()
-    all_train_metrics["train_dice"] = MeanDice(output_transform=from_engine(["pred", "label"]),
-                                               include_background=False)
+    all_train_metrics["train_dice"] = MeanDice(
+        output_transform=from_engine(["pred", "label"]), include_background=False
+    )
     for key_label in args.labels:
         if key_label != "background":
             all_train_metrics[key_label + "_dice"] = MeanDice(
@@ -328,6 +308,7 @@ def create_trainer(args):
             click_probability_key="probability",
             train=True,
             label_names=args.labels,
+            max_interactions=args.max_train_interactions,
         ),
         optimizer=optimizer,
         loss_function=loss_function,
@@ -347,9 +328,7 @@ def run(args):
         print("")
 
     if args.export:
-        logging.info(
-            "{}:: Loading PT Model from: {}".format(args.local_rank, args.input)
-        )
+        logging.info("{}:: Loading PT Model from: {}".format(args.local_rank, args.input))
         device = torch.device("cuda" if args.use_gpu else "cpu")
         network = get_network(args.network, args.labels, args.spatial_size).to(device)
 
@@ -362,9 +341,7 @@ def run(args):
         return
 
     if not os.path.exists(args.output):
-        logging.info(
-            "output path [{}] does not exist. creating it now.".format(args.output)
-        )
+        logging.info("output path [{}] does not exist. creating it now.".format(args.output))
         os.makedirs(args.output, exist_ok=True)
 
     trainer = create_trainer(args)
@@ -418,8 +395,8 @@ def main():
 
     parser.add_argument("-f", "--val_freq", type=int, default=1)
     parser.add_argument("-lr", "--learning_rate", type=float, default=0.0001)
-    parser.add_argument("-it", "--max_train_interactions", type=int, default=15)
-    parser.add_argument("-iv", "--max_val_interactions", type=int, default=5)
+    parser.add_argument("-it", "--max_train_interactions", type=int, default=1)
+    parser.add_argument("-iv", "--max_val_interactions", type=int, default=1)
 
     parser.add_argument("-dpt", "--deepgrow_probability_train", type=float, default=0.4)
     parser.add_argument("-dpv", "--deepgrow_probability_val", type=float, default=1.0)
@@ -433,9 +410,7 @@ def main():
     args = parser.parse_args()
     args.spatial_size = [128, 128, 128]
     # For single label using one of the Medical Segmentation Decathlon
-    args.labels = {'spleen': 1,
-                   'background': 0
-                   }
+    args.labels = {"spleen": 1, "background": 0}
 
     # # For multiple label using the BTCV dataset (https://www.synapse.org/#!Synapse:syn3193805/wiki/217789)
     # # For this, remember to update accordingly the function 'get_loaders' in lines 151-152
@@ -457,7 +432,6 @@ def main():
 
 
 if __name__ == "__main__":
-
     logging.basicConfig(
         stream=sys.stdout,
         level=logging.INFO,

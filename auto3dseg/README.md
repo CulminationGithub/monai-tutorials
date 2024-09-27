@@ -44,7 +44,7 @@ We have demonstrated preliminary results of public datasets are described in the
 - [INSTANCE22](tasks/instance22/README.md)
 - [Beyond the Cranial Vault (BTCV) Abdomen Dataset](tasks/btcv/README.md)
 - Medical Segmentation Decathlon (MSD) Dataset
-        - [Task04 Task04_Hippocampus](tasks/msd/Task04_Hippocampus/README.md)
+	- [Task04 Task04_Hippocampus](tasks/msd/Task04_Hippocampus/README.md)
 	- [Task05 Prostate](tasks/msd/Task05_Prostate/README.md)
 	- [Task09 Spleen](tasks/msd/Task09_Spleen/README.md)
 
@@ -54,7 +54,7 @@ We provide [a two-minute example](notebooks/auto3dseg_hello_world.ipynb) for use
 
 ## A "Real-World" Example
 
-To further demonstrate the capabilities of **Auto3DSeg**, [here](tasks/instance22) is the detailed performance of the algorithm in **Auto3DSeg**, which won 2nd place in the MICCAI 2022 challenge** [INSTANCE22: The 2022 Intracranial Hemorrhage Segmentation Challenge on Non-Contrast Head CT (NCCT)](https://instance.grand-challenge.org/)**
+To further demonstrate the capabilities of **Auto3DSeg**, [here](./tasks/instance22/README.md) is the detailed performance of the algorithm in **Auto3DSeg**, which won 2nd place in the MICCAI 2022 challenge **[INSTANCE22: The 2022 Intracranial Hemorrhage Segmentation Challenge on Non-Contrast Head CT (NCCT)](https://instance.grand-challenge.org/)**
 
 ## Reference Python APIs for Auto3DSeg
 
@@ -62,7 +62,7 @@ To further demonstrate the capabilities of **Auto3DSeg**, [here](tasks/instance2
 
 ### 1. Run with Minimal Input using ```AutoRunner```
 
-The user needs to provide a data list (".json" file) for the new task and data root. A typical data list is as this [example](tasks/msd/Task05_Prostate/msd_task05_prostate_folds.json). After creating the data list, the user can create a simple "task.yaml" file (shown below) as the minimum input for **Auto3DSeg**.
+The user needs to provide a data list (".json" file) for the new task and data root. A typical data list is as this [example](tasks/msd/Task05_Prostate/msd_task05_prostate_folds.json). A sample datalist for an existing MSD formatted dataset can be created using [this notebook](notebooks/msd_datalist_generator.ipynb). After creating the data list, the user can create a simple "task.yaml" file (shown below) as the minimum input for **Auto3DSeg**.
 
 ```
 modality: CT
@@ -91,6 +91,40 @@ Each module of **Auto3DSeg** in different steps can be individually used for dif
 - Step 3: [Model training, validation, and inference](docs/bundle.md)
 - Step 4: [Hyper-parameter optimization](docs/hpo.md)
 - Step 5: [Model ensemble](docs/ensemble.md)
+
+## Performance Benchmarking
+
+The subsequent section presents the benchmarking outcomes of the Auto3DSeg algorithms concerning computational efficiency. Dataset [TotalSegmentator](https://github.com/wasserth/TotalSegmentator) has been selected for demonstration purposes, as it is among the largest publicly available 3D medical image datasets, containing over 1,000 CT images and their corresponding 104 foreground classes of segmentation annotations. This dataset features a substantial variations in field-of-view and organ/bone shapes.
+
+To ensure equitable comparisons, we adhere to the original methodology employed in TotalSegmentator, dividing the 104 foreground classes into five segments and utilizing one segment, comprised of [17 foreground classes](https://github.com/wasserth/TotalSegmentator/blob/bc9092164e6025a185473026613f38a4177e7a09/totalsegmentator/map_to_binary.py#L398-L417), for model training. We have provided numerical results for **each fold** in a 5-fold cross-validation of three algorithms (DiNTS, 3D SegResNet, SwinUNETR). It is important to note that, for this particular dataset, 2D SegResNet is not employed in the model training process due to the data spacing distribution and the internal algorithm selection logic we utilize. The GPU utilization and memory usage are assessed utilizing the widely recognized [DCGM](https://developer.nvidia.com/dcgm) library.
+
+<div align="center">
+
+|    Algorithm   |    GPU    | GPU Numbers | Model Training Time (Hours) | GPU Utilization Rate |
+|:--------------:|:---------:|:-----------:|:---------------------------:|:--------------------:|
+|      DiNTS     | 80GB A100 |      1      |             19.0            |          92%         |
+|      DiNTS     | 80GB A100 |      8      |             2.5             |          92%         |
+|      DiNTS     | 80GB A100 |      16     |             1.5             |          89%         |
+|      DiNTS     | 80GB A100 |      32     |             0.9             |          84%         |
+| SegResNet (3D) | 80GB A100 |      1      |             13.8            |          92%         |
+| SegResNet (3D) | 80GB A100 |      8      |             2.8             |          91%         |
+| SegResNet (3D) | 80GB A100 |      16     |             1.5             |          89%         |
+| SegResNet (3D) | 80GB A100 |      32     |             0.8             |          88%         |
+|    SwinUNETR   | 80GB A100 |      1      |             15.6            |          95%         |
+|    SwinUNETR   | 80GB A100 |      8      |             2.2             |          94%         |
+|    SwinUNETR   | 80GB A100 |      16     |             1.0             |          93%         |
+|    SwinUNETR   | 80GB A100 |      32     |             0.6             |          91%         |
+
+</div>
+
+The table illustrates that when GPU number exceeds or is equal to 8, multi-node training is executed with 8 GPUs allocated per node. As demonstrated by the results, employing a larger number of GPUs significantly diminishes the model training duration. However, there is a minor decrease in GPU utilization rate, which can be attributed to the increased communication costs associated with a greater number of GPUs.
+
+## GPU utilization optimization
+
+Given the variety of GPU devices users have, we provide an automated way to optimize the GPU utilization (e.g., memory usage) of algorithms in Auto3DSeg.
+During algorithm generation, users can enable the optimization option.
+Auto3DSeg can then further automatically tune the hyper-parameters to fully utilize the available GPU capacity.
+Concrete examples can be found [here](docs/gpu_opt.md).
 
 ## FAQ
 

@@ -1,4 +1,4 @@
-# Copyright 2020 MONAI Consortium
+# Copyright (c) MONAI Consortium
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -62,7 +62,7 @@ import monai
 from monai.data import DataLoader, Dataset, create_test_image_3d, DistributedSampler, decollate_batch
 from monai.inferers import sliding_window_inference
 from monai.metrics import DiceMetric
-from monai.transforms import Activations, AsChannelFirstd, AsDiscrete, Compose, LoadImaged, ScaleIntensityd
+from monai.transforms import Activations, EnsureChannelFirstd, AsDiscrete, Compose, LoadImaged, ScaleIntensityd
 
 
 def evaluate(args):
@@ -90,7 +90,7 @@ def evaluate(args):
     val_transforms = Compose(
         [
             LoadImaged(keys=["img", "seg"]),
-            AsChannelFirstd(keys=["img", "seg"], channel_dim=-1),
+            EnsureChannelFirstd(keys=["img", "seg"], channel_dim=-1),
             ScaleIntensityd(keys="img"),
         ]
     )

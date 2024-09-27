@@ -22,12 +22,12 @@ The script is tested with:
 You can conda environments to install the dependencies.
 
 ```bash
-pip install monai==0.9.1 scikit-learn==0.24.2
+pip install scikit-learn==0.24.2
 ```
 
-or you can just use nvidia docker.
+or you can just use MONAI docker.
 ```bash
-docker pull projectmonai/monai:0.9.1
+docker pull projectmonai/monai:latest
 ```
 
 For more information please check out [the installation guide](https://docs.monai.io/en/latest/installation.html).
@@ -42,7 +42,11 @@ python ./ensemble.py -h
 ### Get started
 1. Prepare your bundle.
 
-    First download a bundle from [model-zoo](https://github.com/Project-MONAI/model-zoo/releases/tag/hosting_storage_v1) to somewhere as your `bundle_root_path`.
+    First download a bundle to somewhere as your `bundle_root_path`:
+
+    ```shell
+    python -m monai.bundle download --name spleen_ct_segmentation --bundle_dir "./"
+    ```
 
 2. Prepare your data.
 
@@ -79,16 +83,22 @@ python ensemble.py --bundle_root bundle_root_path --dataset_dir data_root_path
 
 ## **How to integrate Bundle in your own application**
 ### Get component from bundle
+Check all supported properties in https://github.com/Project-MONAI/MONAI/blob/dev/monai/bundle/properties.py.
 ```
-from monai.bundle import ConfigParser
+from monai.bundle import create_workflow
 
-bundle_config = ConfigParser()
-bundle_config.read_config(bundle_config_path)
-postprocessing = bundle_config.get_parsed_content("postprocessing")
+train_workflow = create_workflow(config_file=bundle_config_path, workflow_type="train")
+
+# get train postprocessing
+postprocessing = train_workflow.train_postprocessing
+
+# get meta information
+version = train_workflow.version
+description = train_workflow.description
 ```
 ### Use component in your pipeline
 ```
-# Notice that the `postprocessing` got from `get_parsed_content` is instantiated.
+# Notice that the `postprocessing` got from `train_workflow` is instantiated.
 
 evaluator = SupervisedEvaluator(
             device=device,
@@ -99,11 +109,25 @@ evaluator = SupervisedEvaluator(
         )
 ```
 ### Update component with your own args
-```
-# change the value of `softmax` in `Activationsd` to False
 
-update_key = "postprocessing#transforms#0#softmax"
-bundle_config.update({update_key: False})
+- If the component you want to replace is listed [here](https://github.com/Project-MONAI/MONAI/blob/dev/monai/bundle/properties.py), you can replace it directly as below:
+```
+# update `max_epochs` in workflow
+train_workflow.max_epochs = max_epochs
+
+# must execute 'initialize' again after changing the content
+train_workflow.initialize()
+print(train_workflow.max_epochs)
+```
+- Otherwise, you can override the components when you create the workflow.
+```
+override = {
+            "network": "$@network_def.to(@device)",
+            "dataset#_target_": "Dataset",
+            "dataset#data": [{"image": filename}],
+            "postprocessing#transforms#2#output_postfix": "seg",
+        }
+train_workflow = create_workflow(config_file=bundle_config_path, workflow_type="train", **override)
 ```
 
 ## Questions and bugs

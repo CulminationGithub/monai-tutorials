@@ -1,4 +1,4 @@
-# Copyright 2020 MONAI Consortium
+# Copyright (c) MONAI Consortium
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -73,7 +73,7 @@ from monai.handlers import CheckpointLoader, MeanDice, StatsHandler, from_engine
 from monai.inferers import SlidingWindowInferer
 from monai.transforms import (
     Activationsd,
-    AsChannelFirstd,
+    EnsureChannelFirstd,
     AsDiscreted,
     Compose,
     KeepLargestConnectedComponentd,
@@ -110,7 +110,7 @@ def evaluate(args):
     val_transforms = Compose(
         [
             LoadImaged(keys=["image", "label"]),
-            AsChannelFirstd(keys=["image", "label"], channel_dim=-1),
+            EnsureChannelFirstd(keys=["image", "label"], channel_dim=-1),
             ScaleIntensityd(keys="image"),
         ]
     )
@@ -141,7 +141,7 @@ def evaluate(args):
             Activationsd(keys="pred", sigmoid=True),
             AsDiscreted(keys="pred", threshold=0.5),
             KeepLargestConnectedComponentd(keys="pred", applied_labels=[1]),
-            SaveImaged(keys="pred", meta_keys="image_meta_dict", output_dir="./runs/")
+            SaveImaged(keys="pred", meta_keys="image_meta_dict", output_dir="./runs/"),
         ]
     )
     val_handlers = [
